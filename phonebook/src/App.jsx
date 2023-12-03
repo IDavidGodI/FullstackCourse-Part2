@@ -1,5 +1,11 @@
 import { useState } from 'react'
 
+const Person = ({person})=>{
+  return(
+    <p>{person.name}</p>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([
     { name: 'Arto Hellas' }
@@ -10,9 +16,14 @@ const App = () => {
 
   const addContact = (event)=>{
     event.preventDefault()
-    const newPersons = [...persons, {name: newName}]
-
-    setPersons(newPersons)
+    const trimmedName = newName.trim()
+    if (persons.some((person)=>person.name===trimmedName)){
+      alert(`${trimmedName} already exists in your contacts`)
+      return
+    }
+    const newPerson = {name: trimmedName}
+    setPersons(persons.concat(newPerson))
+    setNewName('')
   }
 
   return (
@@ -28,7 +39,10 @@ const App = () => {
       </form>
       <h2>Numbers</h2>
       {
-        persons.map(person=> <p key={person.name}>{person.name}</p>)
+        persons.map(person=>{
+          console.log(person)
+          return <Person key={person.name} person={person}/>
+        })
       }
     </div>
   )

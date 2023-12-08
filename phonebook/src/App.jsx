@@ -55,8 +55,18 @@ const App = () => {
     })
   }
 
+  const removeContact = (id) =>{
+    const person = persons.find(p=>p.id===id)
+    const confirmed = window.confirm(`Delete ${person.name}`)
+    if (confirmed){
+      personsService
+      .remove(id)
+      .then(response => console.log(response))
+      setPersons(persons.filter(person => person.id!==id))
+    }
+  }
+
   const peopleToShow = persons.filter(person =>{ 
-    console.log(person)
     return person.name.startsWith(filter) || person.number.startsWith(filter) || person.name.split(' ').some(w => w.startsWith(filter))
   }
   )
@@ -74,7 +84,7 @@ const App = () => {
         handleNewNumber = {handleNewNumber}
       />
       <h2>Numbers</h2>
-      <PersonList people={peopleToShow}/>
+      <PersonList people={peopleToShow} handleRemove={removeContact}/>
     </div>
   )
 }

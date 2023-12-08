@@ -4,13 +4,14 @@ import ContactForm from './components/ContactForm'
 import PersonList, {} from "./components/PersonList"
 import { useEffect } from 'react'
 import personsService from './services/persons'
-
+import Message from "./components/Message"
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [message, setMessage] = useState(null)
 
   const handleNewName = (event)=> setNewName(event.target.value);
   const handleNewNumber = (event)=> setNewNumber(event.target.value);
@@ -40,17 +41,19 @@ const App = () => {
       return
     }
     
-    const existentName = persons.find(p=>p.name===trimmedName)
+    const existentPerson = persons.find(p=>p.name===trimmedName)
 
-    if (existentName){
-      const confirmed = window.confirm(`${existentName.name} is already in your contacts, do you want to replace the old number?`)
+    if (existentPerson){
+      const confirmed = window.confirm(`${existentPerson.name} is already in your contacts, do you want to replace the old number?`)
       if (!confirmed) return;
-      const updatedPerdon = {...existentName, number: trimmedNumber}
+      const updatedPerdon = {...existentPerson, number: trimmedNumber}
 
       personsService
-      .update(existentName.id,updatedPerdon)
+      .update(existentPerson.id,updatedPerdon)
       .then(returnedPerson=>{
-        setPersons(persons.map(p=> p.id!==existentName.id? p : returnedPerson))
+        setPersons(persons.map(p=> p.id!==existentPerson.id? p : returnedPerson))
+        setMessage({text: `${existentPerson.name} number modified`, success:true})
+        setTimeout(()=>setMessage(null),5000)
         setNewName('')
         setNewNumber('')
       })
@@ -62,6 +65,8 @@ const App = () => {
     .create(newPerson)
     .then(returnedPerson =>{
       setPersons(persons.concat(returnedPerson))
+      setMessage({text: `${trimmedName} added!`, success:true})
+      setTimeout(()=>setMessage(null),5000)
       setNewName('')
       setNewNumber('')
     })
@@ -86,6 +91,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      {message && <Message success={message.success} text={message.text}/>}
       <Filter filter={filter} handleFilter={handleFilter}/>
       <h2>add a new</h2>
       <ContactForm 

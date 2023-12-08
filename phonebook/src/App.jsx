@@ -3,7 +3,7 @@ import Filter from './components/Filter'
 import ContactForm from './components/ContactForm'
 import PersonList, {} from "./components/PersonList"
 import { useEffect } from 'react'
-import axios from 'axios'
+import personsService from './services/persons'
 
 
 const App = () => {
@@ -17,11 +17,10 @@ const App = () => {
   const handleFilter = (event)=> setFilter(event.target.value);
 
   useEffect(()=>{
-    axios
-    .get("http://localhost:3001/persons")
+    personsService.getAll("http://localhost:3001/persons")
     .then((res)=>{
       console.log("Data obtained")
-      setPersons(res.data)
+      setPersons(res)
     })
 
   },[])
@@ -46,13 +45,20 @@ const App = () => {
     }
 
     const newPerson = {name: trimmedName, number: trimmedNumber}
-    setPersons(persons.concat(newPerson))
-    setNewName('')
-    setNewNumber('')
+    
+    personsService
+    .create(newPerson)
+    .then(returnedPerson =>{
+      setPersons(persons.concat(returnedPerson))
+      setNewName('')
+      setNewNumber('')
+    })
   }
 
-  const peopleToShow = persons.filter(person => 
-    person.name.startsWith(filter) || person.number.startsWith(filter) || person.name.split(' ').some(w => w.startsWith(filter))
+  const peopleToShow = persons.filter(person =>{ 
+    console.log(person)
+    return person.name.startsWith(filter) || person.number.startsWith(filter) || person.name.split(' ').some(w => w.startsWith(filter))
+  }
   )
 
   return (

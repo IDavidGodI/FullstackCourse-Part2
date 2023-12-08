@@ -35,17 +35,29 @@ const App = () => {
       return
     }
 
-    if (persons.some((person)=>person.name===trimmedName)){
-      alert(`${trimmedName} already exists in your contacts`)
-      return
-    }
     if (persons.some((person)=>person.number===trimmedNumber)){
       alert(`The number ${trimmedNumber} already exists in your contacts`)
       return
     }
-
-    const newPerson = {name: trimmedName, number: trimmedNumber}
     
+    const existentName = persons.find(p=>p.name===trimmedName)
+
+    if (existentName){
+      const confirmed = window.confirm(`${existentName.name} is already in your contacts, do you want to replace the old number?`)
+      if (!confirmed) return;
+      const updatedPerdon = {...existentName, number: trimmedNumber}
+
+      personsService
+      .update(existentName.id,updatedPerdon)
+      .then(returnedPerson=>{
+        setPersons(persons.map(p=> p.id!==existentName.id? p : returnedPerson))
+        setNewName('')
+        setNewNumber('')
+      })
+      return
+    }
+    
+    const newPerson = {name: trimmedName, number: trimmedNumber}
     personsService
     .create(newPerson)
     .then(returnedPerson =>{

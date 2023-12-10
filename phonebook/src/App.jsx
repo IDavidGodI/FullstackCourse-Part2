@@ -13,6 +13,7 @@ const App = () => {
   const [filter, setFilter] = useState('')
   const [message, setMessage] = useState(null)
 
+
   const handleNewName = (event)=> setNewName(event.target.value);
   const handleNewNumber = (event)=> setNewNumber(event.target.value);
   const handleFilter = (event)=> setFilter(event.target.value);
@@ -57,6 +58,10 @@ const App = () => {
         setNewName('')
         setNewNumber('')
       })
+      .catch(e=>{
+        setMessage({text: `${existentPerson.name} has been already removed from the server`, success:false})
+        setTimeout(()=>setMessage(null),5000)
+      })
       return
     }
     
@@ -78,12 +83,15 @@ const App = () => {
     if (confirmed){
       personsService
       .remove(id)
-      .then(response => console.log(response))
+      .catch(e=>{
+        setMessage({text: `${person.name} has been already removed from the server`, success:false})
+        setTimeout(()=>setMessage(null),5000)
+      })
       setPersons(persons.filter(person => person.id!==id))
     }
   }
 
-  const peopleToShow = persons.filter(person =>{ 
+  const peopleToShow = persons.filter(person =>{
     return person.name.startsWith(filter) || person.number.startsWith(filter) || person.name.split(' ').some(w => w.startsWith(filter))
   }
   )
@@ -91,7 +99,12 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      {message && <Message success={message.success} text={message.text}/>}
+      {message && 
+        <Message 
+          success={message.success} 
+          text={message.text}
+        />
+      }
       <Filter filter={filter} handleFilter={handleFilter}/>
       <h2>add a new</h2>
       <ContactForm 

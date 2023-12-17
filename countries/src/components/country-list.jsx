@@ -1,18 +1,54 @@
 import DisplayCountry from "./display-country";
+import weatherService from "../services/weather-service";
+import { useEffect,useState } from "react";
 
-const CountryList = ({countries})=>{
-  const display = 
-    (countries.length===1 && <DisplayCountry country={countries[0]}/>) ||
+const CountryList = ({countries, expanded,handleExpand, weather, updateWeather})=>{
+  
+  const [fetchingWeather, setFetchingWeather] = useState(true);
 
-    ( countries.length<=10 &&
-    <ul>
-      {countries.map((c)=><li key={c.area}>{c.name.common}</li>)}
-    </ul>) ||
-    (<p>Too many matches, be more specific</p>)
+  useEffect(()=>{
+    setFetchingWeather(true)
+    const country = countries.find((c)=> expanded && c.cca2===expanded)
+    if (country)
+    weatherService.getWeatherData(...country.latlng)
+    .then(res=>{
+      updateWeather(res)
+      setFetchingWeather(false)
+    })
+  }, [expanded])
 
+  const updateExpand = (cca2)=>{
+    handleExpand(cca2)
+  }
   return(
     <>
-      {display}
+      {
+        countries.length<=10?
+        <>
+          {expanded &&
+            <DisplayCountry 
+              country={countries.find((c)=>c.cca2===expanded)}
+              weather = {weather}
+              fetchingWeather = {fetchingWeather}
+            />
+          }
+          {
+            countries.length>1 &&
+            <ul className="results-list">
+              {countries.map((c)=>
+                <li key={c.cca2}>
+                  <span>
+                    {c.name.common}
+                    <button onClick={()=>updateExpand(c.cca2)}>{expanded===c.cca2? "hide" : "show"}</button>
+                  </span>
+                </li>)}
+            </ul>
+          }
+        </>
+        
+        :
+        (<p>Too many matches, be more specific</p>)
+      }
     </>
   )
 }
